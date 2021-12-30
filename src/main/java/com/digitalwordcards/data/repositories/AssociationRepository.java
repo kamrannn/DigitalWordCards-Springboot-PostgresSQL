@@ -15,4 +15,5 @@ public interface AssociationRepository extends JpaRepository<CardAssociation, UU
     Optional<CardAssociation> findByCardAndUser(Card card, User user);
 
     List<CardAssociation> findCardAssociationByCard(Card card);
+    List<CardAssociation> findCardAssociationByUser(User user);
 }

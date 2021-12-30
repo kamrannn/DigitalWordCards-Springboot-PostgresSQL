@@ -1,10 +1,13 @@
 package com.digitalwordcards.controllers;
 
+import com.digitalwordcards.data.CardAssociation;
 import com.digitalwordcards.data.Role;
 import com.digitalwordcards.data.User;
+import com.digitalwordcards.data.repositories.AssociationRepository;
 import com.digitalwordcards.data.repositories.UserRepository;
 import com.digitalwordcards.data.requests.UserCreationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +30,8 @@ public class UserController implements UserDetailsService {
 
     private final UserRepository repository;
     private final PasswordEncoder encoder;
+    @Autowired
+    AssociationRepository associationRepository;
 
     @PostMapping("/create")
     public User createUser(@RequestBody UserCreationRequest request) {
@@ -58,11 +64,23 @@ public class UserController implements UserDetailsService {
 
     @DeleteMapping
     public void deleteUser(@RequestBody Map<String, String> email) {
+        Optional<User> user = repository.findUserByEmail(email.get("email"));
+        if (user.isPresent()) {
+            List<CardAssociation> cardAssociations = associationRepository.findCardAssociationByUser(user.get());
+            for (CardAssociation association : cardAssociations
+            ) {
+                association.setUser(null);
+                association.setCard(null);
+                associationRepository.save(association);
+            }
+            user.get().setViewedCards(null);
+            repository.save(user.get());
+        }
         repository.deleteById(email.get("email"));
     }
 
     @GetMapping
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<Object> getAll() {
         List<User> usersList = repository.findAll();
         return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
