@@ -6,6 +6,7 @@ import com.digitalwordcards.data.repositories.UserRepository;
 import com.digitalwordcards.data.requests.UserCreationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users/")
+@RequestMapping("/api/users")
 public class UserController implements UserDetailsService {
 
     private final UserRepository repository;
@@ -38,11 +40,9 @@ public class UserController implements UserDetailsService {
                     if (authentication.getAuthorities().stream().anyMatch(role::canBeGrantedBy)) {
                         user.setEmail(request.getEmail());
                         user.setRole(role);
-
                         user.setClazz(request.getClazz());
                         user.setName(request.getName());
                         user.setPassword(encoder.encode(request.getPassword()));
-
                         repository.saveAndFlush(user);
                     } else
                         throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "You cannot create an user with " + role.getAuthority() + " authority!");
@@ -57,17 +57,20 @@ public class UserController implements UserDetailsService {
     }
 
     @DeleteMapping
-    public void deleteUser(@RequestBody String email) {
-        repository.deleteById(email);
+    public void deleteUser(@RequestBody Map<String, String> email) {
+        repository.deleteById(email.get("email"));
     }
 
     @GetMapping
-    public List<User> getAll() {
-        return repository.findAll();
+    public ResponseEntity<?> getAll() {
+        List<User> usersList = repository.findAll();
+        return new ResponseEntity<>(usersList, HttpStatus.OK);
     }
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return repository.findById(s).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
     }
+
+
 }

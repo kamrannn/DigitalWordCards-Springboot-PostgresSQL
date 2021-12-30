@@ -111,13 +111,18 @@ Module: 2
 
 # ENDPOINTS
 
+Gebruik deze link om naar een publieke Postman omgeving te gaan met vooraf ingevulde requests:
+[https://www.postman.com/ttrinh85/workspace/public/collection/17433272-223b9c9b-b936-443c-a80f-a74d26a10a34](https://www.postman.com/ttrinh85/workspace/public/collection/17433272-223b9c9b-b936-443c-a80f-a74d26a10a34)
+
 * POST 	/api/users/create
 * POST 	/api/cards/create
-* PUT 		/api/cards/view/
+* PUT 		/api/cards/view
+* PUT 		/api/cards/modify
 * GET 		/api/users/
 * GET 		/api/cards/all
 * GET 		/api/cards/class/{CLAZZ}
 * GET 		/api/cards/module/{MODULE}
 * GET 		/api/cards/viewed/{MODULE}
 * DELETE 	/api/cards/delete
-* DELETE 	/api/users/
+* DELETE 	/api/users
+

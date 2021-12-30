@@ -20,10 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -52,10 +49,41 @@ public class CardsController {
         return card;
     }
 
+
+//    @DeleteMapping("/delete")
+//    @PreAuthorize("hasAnyAuthority('ADMIN')")
+//    public void deleteCard(@RequestBody UUIDWrapper id) {
+//        repository.deleteById(id.id);
+//    }
+
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public void deleteCard(@RequestBody UUID id) {
-        repository.deleteById(id);
+    public void deleteCard(@RequestBody UUIDWrapper id) {
+        Optional<Card> card = repository.findById(id.id);
+//        List<CardAssociation> viewedCards= users.findByViewedCards(card.get());
+        if (card.isPresent()) {
+            List<CardAssociation> cardAss = associationRepository.findCardAssociationByCard(card.get());
+            if(cardAss.isEmpty()){
+
+            }else{
+                for (CardAssociation cardAssociation: cardAss
+                     ) {
+                    cardAssociation.setCard(null);
+                    cardAssociation.setUser(null);
+                    associationRepository.save(cardAssociation);
+                    associationRepository.deleteById(cardAssociation.getId());
+                }
+            }
+/*            if (cardAss.isPresent()) {
+                cardAss.get().setCard(null);
+                cardAss.get().setUser(null);
+                associationRepository.save(cardAss.get());
+                associationRepository.delete(cardAss.get());
+            }*/
+            repository.deleteById(id.id);
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     @GetMapping("/see")
@@ -84,7 +112,7 @@ public class CardsController {
                 .orElse(new HashSet<>());
     }
 
-    @PutMapping("/view/")
+    @PutMapping("/view")
     public void viewCard(@RequestBody UUIDWrapper id) {
         final String name = SecurityContextHolder.getContext().getAuthentication().getName();
         users.findById(name).ifPresent(user -> {
@@ -114,9 +142,10 @@ public class CardsController {
                 .collect(Collectors.toList());
     }
 
-    @PutMapping("/modify/")
+
+    @PutMapping("/modify")
     @PreAuthorize("hasAnyAuthority('TEACHER')")
-    public void modifyCard(CardModificationRequest request) {
+    public void modifyCard(@ModelAttribute CardModificationRequest request) {
         final Card card = repository.getById(request.getId());
         request.getModule().ifPresent(card::setModule);
         request.getData().ifPresent(card::setImage);
