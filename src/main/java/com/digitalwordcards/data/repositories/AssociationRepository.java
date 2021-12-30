@@ -13,8 +13,6 @@ import java.util.UUID;
 @Repository
 public interface AssociationRepository extends JpaRepository<CardAssociation, UUID> {
     Optional<CardAssociation> findByCardAndUser(Card card, User user);
-/*
-    Optional<CardAssociation> findCardAssociationByCard(Card card);
-*/
+
     List<CardAssociation> findCardAssociationByCard(Card card);
 }

@@ -49,37 +49,23 @@ public class CardsController {
         return card;
     }
 
-
-//    @DeleteMapping("/delete")
-//    @PreAuthorize("hasAnyAuthority('ADMIN')")
-//    public void deleteCard(@RequestBody UUIDWrapper id) {
-//        repository.deleteById(id.id);
-//    }
-
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteCard(@RequestBody UUIDWrapper id) {
         Optional<Card> card = repository.findById(id.id);
-//        List<CardAssociation> viewedCards= users.findByViewedCards(card.get());
         if (card.isPresent()) {
             List<CardAssociation> cardAss = associationRepository.findCardAssociationByCard(card.get());
-            if(cardAss.isEmpty()){
+            if (cardAss.isEmpty()) {
 
-            }else{
-                for (CardAssociation cardAssociation: cardAss
-                     ) {
+            } else {
+                for (CardAssociation cardAssociation : cardAss
+                ) {
                     cardAssociation.setCard(null);
                     cardAssociation.setUser(null);
                     associationRepository.save(cardAssociation);
                     associationRepository.deleteById(cardAssociation.getId());
                 }
             }
-/*            if (cardAss.isPresent()) {
-                cardAss.get().setCard(null);
-                cardAss.get().setUser(null);
-                associationRepository.save(cardAss.get());
-                associationRepository.delete(cardAss.get());
-            }*/
             repository.deleteById(id.id);
         } else {
             throw new RuntimeException();
@@ -126,7 +112,7 @@ public class CardsController {
                 associationRepository.saveAndFlush(association);
                 user.getViewedCards().add(association);
                 users.saveAndFlush(user);
-            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Association already existst");
+            } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Association already exists");
         });
     }
 

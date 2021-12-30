@@ -1,15 +1,11 @@
 package com.digitalwordcards.data;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -23,9 +19,6 @@ public class User implements UserDetails {
     private String name;
     private String clazz;
     private String password;
-
-//    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-//    private Set<CardAssociation> viewedCards;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     private Set<CardAssociation> viewedCards;
